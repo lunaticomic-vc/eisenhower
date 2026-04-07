@@ -15,6 +15,7 @@ import { QuadrantColumn } from "./QuadrantColumn";
 import { TaskCard } from "./TaskCard";
 import { TaskDetail } from "./TaskDetail";
 import { AddTaskInput } from "./AddTaskInput";
+import { CalendarInput } from "./CalendarInput";
 
 const QUADRANT_ORDER: Quadrant[] = [
   "urgent-important",
@@ -27,7 +28,7 @@ export function EisenhowerMatrix() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [selectedTask, setSelectedTask] = useState<{ task: Task; rect: DOMRect } | null>(null);
-  const [showInput, setShowInput] = useState(false);
+  const [showInput, setShowInput] = useState<false | "task" | "calendar">(false);
   const [calSyncing, setCalSyncing] = useState(false);
   const [calStatus, setCalStatus] = useState<string | null>(null);
   const calTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -56,7 +57,11 @@ export function EisenhowerMatrix() {
       if (tag === "INPUT" || tag === "TEXTAREA") return;
       if (e.key === "/" || e.key === "n") {
         e.preventDefault();
-        setShowInput(true);
+        setShowInput("task");
+      }
+      if (e.key === "c") {
+        e.preventDefault();
+        setShowInput("calendar");
       }
       if (e.key === "Escape") {
         setShowInput(false);
@@ -177,7 +182,7 @@ export function EisenhowerMatrix() {
       {!showInput && !selectedTask && (
         <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
           <button
-            onClick={() => setShowInput(true)}
+            onClick={() => setShowInput("task")}
             className={[
               "h-10 px-4 rounded-full",
               "bg-white/[0.07] border border-[var(--border)] backdrop-blur-md",
@@ -190,6 +195,25 @@ export function EisenhowerMatrix() {
             <span>+</span>
             <span>Add task</span>
             <kbd className="ml-1 text-[10px] text-[var(--text-tertiary)]/50 border border-[var(--border)] rounded px-1 py-0.5">/</kbd>
+          </button>
+
+          <button
+            onClick={() => setShowInput("calendar")}
+            className={[
+              "h-10 px-4 rounded-full",
+              "bg-white/[0.07] border border-[var(--border)] backdrop-blur-md",
+              "text-xs text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]",
+              "hover:bg-white/[0.1] hover:border-[var(--border-strong)]",
+              "transition-all duration-150",
+              "flex items-center gap-2",
+            ].join(" ")}
+          >
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="1" y="2.5" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M4 1v2.5M10 1v2.5M1 6h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+            <span>Calendar</span>
+            <kbd className="ml-1 text-[10px] text-[var(--text-tertiary)]/50 border border-[var(--border)] rounded px-1 py-0.5">c</kbd>
           </button>
 
           <button
@@ -207,8 +231,8 @@ export function EisenhowerMatrix() {
             title="Sync deadlines to Google Calendar"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className={calSyncing ? "animate-spin" : ""}>
-              <rect x="1" y="2.5" width="12" height="10" rx="2" stroke="currentColor" strokeWidth="1.2"/>
-              <path d="M4 1v2.5M10 1v2.5M1 6h12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
+              <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.2"/>
+              <path d="M7 4v3.5l2.5 1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"/>
             </svg>
             <span>Sync</span>
           </button>
@@ -227,10 +251,14 @@ export function EisenhowerMatrix() {
         <div className="fixed inset-0 z-40 flex items-end justify-center pb-6" onClick={() => setShowInput(false)}>
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
           <div className="relative w-full max-w-xl mx-4" onClick={(e) => e.stopPropagation()}>
-            <AddTaskInput
-              onTaskAdded={() => { fetchTasks(); setShowInput(false); }}
-              autoFocus
-            />
+            {showInput === "task" ? (
+              <AddTaskInput
+                onTaskAdded={() => { fetchTasks(); setShowInput(false); }}
+                autoFocus
+              />
+            ) : (
+              <CalendarInput onDone={() => setShowInput(false)} />
+            )}
           </div>
         </div>
       )}

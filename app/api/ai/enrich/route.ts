@@ -15,6 +15,7 @@ export async function POST(request: Request) {
       {
         role: "system",
         content: `You are a task management assistant. Rewrite the given task title and description to be clearer, more specific, and more actionable.
+IMPORTANT: Keep the SAME LANGUAGE as the input. Do NOT translate. If the input is in Bulgarian, write in Bulgarian. If in English, write in English.
 Return a JSON object with exactly these fields:
 - title: string (clear, concise, imperative form, 3-8 words)
 - description: string (detailed, actionable description, 1-3 sentences)
