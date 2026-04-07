@@ -31,7 +31,6 @@ export function QuadrantColumn({ quadrant, tasks, onDelete, onTaskClick }: Quadr
   const { title, subtitle } = QUADRANT_LABELS[quadrant];
   const accentColor = QUADRANT_ACCENT[quadrant];
   const dimColor = QUADRANT_DIM[quadrant];
-
   return (
     <div
       className={[

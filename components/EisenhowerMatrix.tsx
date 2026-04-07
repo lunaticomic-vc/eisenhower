@@ -155,7 +155,7 @@ export function EisenhowerMatrix() {
           }}
         >
           {QUADRANT_ORDER.map((quadrant) => (
-            <div key={quadrant} style={{ background: "var(--bg)" }}>
+            <div key={quadrant} className="min-h-0">
               <QuadrantColumn
                 quadrant={quadrant}
                 tasks={tasks.filter((t) => t.quadrant === quadrant)}
