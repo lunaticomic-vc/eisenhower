@@ -1,4 +1,4 @@
-import db, { initDB } from "@/lib/db";
+import { getDB, initDB } from "@/lib/db";
 import type { Task, Quadrant } from "@/lib/types";
 
 function rowToTask(row: Record<string, unknown>): Task {
@@ -17,7 +17,7 @@ function rowToTask(row: Record<string, unknown>): Task {
 
 export async function GET() {
   await initDB();
-  const result = await db.execute("SELECT * FROM tasks ORDER BY created_at DESC");
+  const result = await getDB().execute("SELECT * FROM tasks ORDER BY created_at DESC");
   const tasks = result.rows.map((row) => rowToTask(row as Record<string, unknown>));
   return Response.json(tasks);
 }
@@ -32,13 +32,13 @@ export async function POST(request: Request) {
   }
 
   const id = crypto.randomUUID();
-  await db.execute({
+  await getDB().execute({
     sql: `INSERT INTO tasks (id, title, description, quadrant, deadline, context, calendar_event_id)
           VALUES (?, ?, ?, ?, ?, ?, ?)`,
     args: [id, title, description, quadrant, deadline, context, calendarEventId],
   });
 
-  const result = await db.execute({ sql: "SELECT * FROM tasks WHERE id = ?", args: [id] });
+  const result = await getDB().execute({ sql: "SELECT * FROM tasks WHERE id = ?", args: [id] });
   const task = rowToTask(result.rows[0] as Record<string, unknown>);
   return Response.json(task, { status: 201 });
 }

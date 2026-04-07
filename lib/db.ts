@@ -2,7 +2,7 @@ import { createClient, type Client } from "@libsql/client";
 
 let _db: Client | null = null;
 
-function getDB(): Client {
+export function getDB(): Client {
   if (!_db) {
     _db = createClient({
       url: process.env.TURSO_DATABASE_URL!,
@@ -28,9 +28,3 @@ export async function initDB() {
     )
   `);
 }
-
-export default new Proxy({} as Client, {
-  get(_, prop) {
-    return (getDB() as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});

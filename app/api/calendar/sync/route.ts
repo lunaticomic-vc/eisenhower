@@ -1,4 +1,4 @@
-import db, { initDB } from "@/lib/db";
+import { getDB, initDB } from "@/lib/db";
 import { createCalendarEvent, updateCalendarEvent } from "@/lib/calendar";
 import type { Task, Quadrant } from "@/lib/types";
 
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     return Response.json({ error: "taskId is required" }, { status: 400 });
   }
 
-  const result = await db.execute({ sql: "SELECT * FROM tasks WHERE id = ?", args: [taskId] });
+  const result = await getDB().execute({ sql: "SELECT * FROM tasks WHERE id = ?", args: [taskId] });
   if (result.rows.length === 0) {
     return Response.json({ error: "Task not found" }, { status: 404 });
   }
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     await updateCalendarEvent(calendarEventId, task.title, task.description, task.deadline);
   } else {
     calendarEventId = await createCalendarEvent(task.title, task.description, task.deadline);
-    await db.execute({
+    await getDB().execute({
       sql: "UPDATE tasks SET calendar_event_id = ?, updated_at = datetime('now') WHERE id = ?",
       args: [calendarEventId, task.id],
     });

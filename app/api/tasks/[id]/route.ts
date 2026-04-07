@@ -1,4 +1,4 @@
-import db, { initDB } from "@/lib/db";
+import { getDB, initDB } from "@/lib/db";
 import type { Task, Quadrant } from "@/lib/types";
 
 function rowToTask(row: Record<string, unknown>): Task {
@@ -23,7 +23,7 @@ export async function PATCH(
   const { id } = await params;
   const body = await request.json();
 
-  const check = await db.execute({ sql: "SELECT id FROM tasks WHERE id = ?", args: [id] });
+  const check = await getDB().execute({ sql: "SELECT id FROM tasks WHERE id = ?", args: [id] });
   if (check.rows.length === 0) {
     return Response.json({ error: "Task not found" }, { status: 404 });
   }
@@ -47,12 +47,12 @@ export async function PATCH(
   updates.push("updated_at = datetime('now')");
   args.push(id);
 
-  await db.execute({
+  await getDB().execute({
     sql: `UPDATE tasks SET ${updates.join(", ")} WHERE id = ?`,
     args,
   });
 
-  const result = await db.execute({ sql: "SELECT * FROM tasks WHERE id = ?", args: [id] });
+  const result = await getDB().execute({ sql: "SELECT * FROM tasks WHERE id = ?", args: [id] });
   const task = rowToTask(result.rows[0] as Record<string, unknown>);
   return Response.json(task);
 }
@@ -64,11 +64,11 @@ export async function DELETE(
   await initDB();
   const { id } = await params;
 
-  const check = await db.execute({ sql: "SELECT id FROM tasks WHERE id = ?", args: [id] });
+  const check = await getDB().execute({ sql: "SELECT id FROM tasks WHERE id = ?", args: [id] });
   if (check.rows.length === 0) {
     return Response.json({ error: "Task not found" }, { status: 404 });
   }
 
-  await db.execute({ sql: "DELETE FROM tasks WHERE id = ?", args: [id] });
+  await getDB().execute({ sql: "DELETE FROM tasks WHERE id = ?", args: [id] });
   return new Response(null, { status: 204 });
 }
